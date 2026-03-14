@@ -3,13 +3,13 @@
 # Declare variables to be passed into your templates.
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+replicaCount: 3
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: nginx
+  repository: us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app
   # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
@@ -54,20 +54,20 @@ service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 80
+  port: 5000
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  enabled: false
-  className: ""
+  enabled: true
+  className: "gce"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: chart-example.local
+    - host: "*"
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -110,52 +110,78 @@ httpRoute:
   #     headers:
   #     - name: version
   #       value: v2
+resources:
+  requests:
+    cpu: 100m        # Minimum CPU guaranteed for the container
+    memory: 128Mi    # Minimum memory guaranteed
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
+  limits:
+    cpu: 500m        # Maximum CPU the container can use
+    memory: 512Mi    # Maximum memory the container can use
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
+livenessProbe:  
+  httpGet:                 # Kubernetes will perform an HTTP request to check container health
+    path: /                # The endpoint path that Kubernetes will call (http://pod-ip:port/)
+    port: 5000             # The container port where the application is running
+  initialDelaySeconds: 10  # Wait 10 seconds after container starts before performing the first health check
+  periodSeconds: 10        # Kubernetes will run the liveness check every 10 seconds
+  timeoutSeconds: 5        # If the application does not respond within 5 seconds, the check fails
+  failureThreshold: 3      # After 3 consecutive failures, Kubernetes will restart the container
 readinessProbe:
-  httpGet:
-    path: /
-    port: http
+  httpGet:                # Kubernetes sends an HTTP request to check if the app is ready to accept traffic
+    path: /               # Endpoint used to check readiness
+    port: 5000            # Port where the application is listening
+  initialDelaySeconds: 5  # Wait 5 seconds before the first readiness check
+  periodSeconds: 5        # Run readiness check every 5 seconds
+  timeoutSeconds: 3       # If the app does not respond within 3 seconds, the check fails
+  failureThreshold: 3     # After 3 failures the pod is marked "Not Ready"
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+# targetMemoryUtilizationPercentage: 70
 
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+# Example Persistent Volume Claim configuration
+# Uncomment this section if the application needs persistent storage
+# volumes:
+#   - name: app-storage
+#     persistentVolumeClaim:
+#       claimName: notes-pvc
 
-# Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-# - name: foo
-#   mountPath: "/etc/foo"
-#   readOnly: true
+# volumeMounts:
+#   - name: app-storage
+#     mountPath: /data
+#     readOnly: false
 
-nodeSelector: {}
+# Example nodeSelector configuration
+# This forces the pod to run only on nodes with a specific label
+# Example: node labeled as "workload=backend"
+# nodeSelector:
+#   workload: backend
 
-tolerations: []
 
-affinity: {}
+# Example tolerations configuration
+# This allows pods to run on nodes that have taints
+# Example: node dedicated for backend workloads
+# tolerations:
+#   - key: "dedicated"
+#     operator: "Equal"
+#     value: "backend"
+#     effect: "NoSchedule"
+
+
+# Example affinity configuration
+# Used for advanced scheduling rules
+# Example: run pods only on nodes labeled "workload=backend"
+# affinity:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#         - matchExpressions:
+#             - key: workload
+#               operator: In
+#               values:
+#                 - backend
