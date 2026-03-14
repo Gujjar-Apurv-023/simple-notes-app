@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "notes-app-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "notes-app-chart.labels" . | nindent 4 }}
 
@@ -50,10 +51,6 @@ spec:
           {{- end }}
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          # Builds container image dynamically using values.yaml
-          # .Values.image.repository → Artifact Registry path
-          # .Values.image.tag → passed by Jenkins (commit hash)
-          # default .Chart.AppVersion → fallback if tag not provided
 
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
