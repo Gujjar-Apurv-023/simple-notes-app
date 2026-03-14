@@ -1,3 +1,5 @@
+@Library('shared') _
+
 pipeline {
 agent any
 
@@ -5,10 +7,35 @@ environment {
 TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
 SONAR_HOME = tool "sonar"
 IMAGE_NAME = "us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app"
-CONTAINER_NAME = "notes-app"
+
+RELEASE_NAME = "notes-app"
+NAMESPACE = "dev"
+CHART_PATH = "./notes-app-chart"
+VALUES_FILE = "./notes-app-chart/values.yaml"
 }
 
 stages {
+
+// ==================================================
+// 🔐 AUTHENTICATE GCP & CONNECT GKE
+// ==================================================
+
+stage('Authenticate GCP & Connect GKE') {
+    steps {
+        withCredentials([file(credentialsId: 'gcp-artifact-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+            sh '''
+            gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+            gcloud container clusters get-credentials project-apurv \
+            --region us-west1 \
+            --project project-3fb9dc72-feba-49ea-b89
+
+            kubectl get nodes
+            '''
+        }
+    }
+}
 
 // ==================================================
 // 🔄 CHECKOUT CODE
@@ -17,32 +44,6 @@ stages {
 stage('Checkout Code') {
     steps {
         checkout scm
-    }
-}
-
-// ==================================================
-// 🔐 GCP AUTHENTICATION
-// ==================================================
-
-stage('Authenticate GCP') {
-    steps {
-        withCredentials([file(credentialsId: 'gcp-artifact-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-            sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-            sh 'gcloud auth configure-docker us-central1-docker.pkg.dev --quiet'
-        }
-    }
-}
-
-// ==================================================
-// ✅ TEST GKE CLUSTER CONNECTION
-// ==================================================
-
-stage('Test GKE Cluster') {
-    steps {
-        sh """
-        gcloud container clusters get-credentials project-apurv --region us-west1 --project project-3fb9dc72-feba-49ea-b89
-        kubectl get nodes
-        """
     }
 }
 
@@ -67,21 +68,25 @@ stage('Build & Push Image') {
         sh """
         docker build -t ${IMAGE_NAME}:${TAG} -t ${IMAGE_NAME}:latest .
         docker push ${IMAGE_NAME}:${TAG}
+        docker push ${IMAGE_NAME}:latest
         """
     }
 }
 
 // ==================================================
-// 🚀 DEPLOY CONTAINER
+// 🚀 HELM DEPLOY USING SHARED LIBRARY
 // ==================================================
 
-stage('Deploy Container') {
+stage('Helm Deploy') {
     steps {
-        sh """
-        docker stop ${CONTAINER_NAME} || true
-        docker rm ${CONTAINER_NAME} || true
-        docker run -d -p 5000:5000 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${TAG}
-        """
+        script {
+            helmDeploy(
+                releaseName: "${RELEASE_NAME}",
+                chartPath: "${CHART_PATH}",
+                namespace: "${NAMESPACE}",
+                valuesFile: "${VALUES_FILE}"
+            )
+        }
     }
 }
 
