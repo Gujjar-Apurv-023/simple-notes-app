@@ -1,15 +1,39 @@
 apiVersion: v1
 kind: Service
+
 metadata:
   name: {{ include "notes-app-chart.fullname" . }}
+  # Uses helper function from _helpers.tpl to generate a consistent name
+
   labels:
     {{- include "notes-app-chart.labels" . | nindent 4 }}
+    # Common labels shared across all resources (deployment, service, pods)
+
 spec:
+
   type: {{ .Values.service.type }}
+  # Service type comes from values.yaml
+  # ClusterIP → internal service (used with Ingress)
+
   ports:
     - port: {{ .Values.service.port }}
+      # External service port (from values.yaml → 5000)
+
       targetPort: http
+      # Must match the container port name in deployment.yaml
+      # Deployment defines:
+      # ports:
+      #   - name: http
+      #     containerPort: 5000
+
       protocol: TCP
+      # Network protocol used by the service
+
       name: http
+      # Name of the port (useful for referencing ports)
+
   selector:
     {{- include "notes-app-chart.selectorLabels" . | nindent 4 }}
+    # VERY IMPORTANT:
+    # This selector must match the labels in deployment.yaml pods
+    # Helm helper ensures they stay consistent across resources
