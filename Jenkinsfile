@@ -7,14 +7,23 @@ environment {
 TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
 SONAR_HOME = tool "sonar"
 IMAGE_NAME = "us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app"
-
 RELEASE_NAME = "notes-app"
 NAMESPACE = "dev"
-CHART_PATH = "./notes-app-chart"
-VALUES_FILE = "./notes-app-chart/values.yaml"
+CHART_PATH = "./helm/notes-app-chart"
+VALUES_FILE = "./helm/notes-app-chart/values.yaml"
 }
 
 stages {
+
+// ==================================================
+// 🔄 CHECKOUT CODE
+// ==================================================
+
+stage('Checkout Code') {
+    steps {
+        checkout scm
+    }
+}
 
 // ==================================================
 // 🔐 AUTHENTICATE GCP & CONNECT GKE
@@ -26,7 +35,6 @@ stage('Authenticate GCP & Connect GKE') {
             sh '''
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
             gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-
             gcloud container clusters get-credentials project-apurv \
             --region us-west1 \
             --project project-3fb9dc72-feba-49ea-b89
@@ -34,16 +42,6 @@ stage('Authenticate GCP & Connect GKE') {
             kubectl get nodes
             '''
         }
-    }
-}
-
-// ==================================================
-// 🔄 CHECKOUT CODE
-// ==================================================
-
-stage('Checkout Code') {
-    steps {
-        checkout scm
     }
 }
 
