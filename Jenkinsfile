@@ -16,6 +16,16 @@ VALUES_FILE = "./helm/notes-app-chart/values.yaml"
 stages {
 
 // ==================================================
+// 🧹 CLEAN WORKSPACE
+// ==================================================
+
+stage('Clean Workspace') {
+    steps {
+        cleanWs()
+    }
+}
+
+// ==================================================
 // 🔄 CHECKOUT CODE
 // ==================================================
 
@@ -35,11 +45,6 @@ stage('Authenticate GCP & Connect GKE') {
             sh '''
             gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
             gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-            gcloud container clusters get-credentials project-apurv \
-            --region us-west1 \
-            --project project-3fb9dc72-feba-49ea-b89
-
-            kubectl get nodes
             '''
         }
     }
@@ -66,7 +71,6 @@ stage('Build & Push Image') {
         sh """
         docker build -t ${IMAGE_NAME}:${TAG} -t ${IMAGE_NAME}:latest .
         docker push ${IMAGE_NAME}:${TAG}
-        docker push ${IMAGE_NAME}:latest
         """
     }
 }
@@ -90,3 +94,4 @@ stage('Helm Deploy') {
 
 }
 }
+
