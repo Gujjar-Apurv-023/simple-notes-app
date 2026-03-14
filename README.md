@@ -466,3 +466,219 @@ simple-notes-app:a3f9b7c1d2
 <img width="1824" height="110" alt="image" src="https://github.com/user-attachments/assets/8aaba630-2211-45c1-9f2c-602aa87f7f6d" />
 
 <img width="1848" height="731" alt="image" src="https://github.com/user-attachments/assets/fdeabc71-dd4f-4d31-a32f-56eb265f2ab6" />
+
+
+## 🚀 Helm Deployment Steps
+
+### 1️⃣ Create Helm Chart
+
+Create a Helm chart for the application.
+
+```bash
+helm create notes-app-chart
+```
+
+---
+
+### 2️⃣ Configure `values.yaml`
+
+Update the following fields in `values.yaml`:
+
+* Docker image repository
+* Image tag
+* Service type and port
+* Resource requests and limits
+* Autoscaling configuration
+
+Example:
+
+```yaml
+image:
+  repository: <artifact-registry-image>
+  pullPolicy: Always
+  tag: ""
+
+service:
+  type: LoadBalancer
+  port: 5000
+```
+
+---
+
+### 3️⃣ Update Deployment Template
+
+Edit `templates/deployment.yaml` to use values from `values.yaml`.
+
+```yaml
+image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+imagePullPolicy: {{ .Values.image.pullPolicy }}
+```
+
+---
+
+### 4️⃣ Configure Service
+
+Update `templates/service.yaml` to expose the application.
+
+```yaml
+type: {{ .Values.service.type }}
+port: {{ .Values.service.port }}
+```
+
+---
+
+### 5️⃣ Build and Push Docker Image
+
+```bash
+docker build -t <image-name>:<tag> .
+docker push <image-name>:<tag>
+```
+
+---
+
+### 6️⃣ Deploy Using Helm
+
+```bash
+helm upgrade --install notes-app ./helm/notes-app-chart \
+  --namespace dev \
+  --create-namespace \
+  --set image.tag=<tag>
+```
+
+---
+
+### 7️⃣ Verify Deployment
+
+```bash
+kubectl get pods -n dev
+kubectl get svc -n dev
+```
+
+---
+
+### 8️⃣ Load Testing (Optional)
+
+```bash
+hey -z 5m -c 300 http://<EXTERNAL-IP>:5000
+```
+
+---
+
+### 9️⃣ Monitor Autoscaling
+
+```bash
+kubectl get hpa -n dev -w
+kubectl get pods -n dev -w
+```
+## 🚀 CI/CD Pipeline Overview
+
+This project uses **Jenkins + Shared Library + Helm** to automate the build and deployment of the Notes App to Kubernetes.
+
+---
+
+## 🧩 Jenkins Pipeline (Jenkinsfile)
+
+The **Jenkinsfile** defines the CI/CD workflow executed when code is pushed to GitHub.
+
+### Pipeline Stages
+
+**1️⃣ Clean Workspace**
+Removes old files from the Jenkins workspace to ensure a fresh build.
+
+```bash
+cleanWs()
+```
+
+**2️⃣ Checkout Code**
+Pulls the latest source code from the GitHub repository.
+
+```bash
+checkout scm
+```
+
+**3️⃣ Authenticate with Google Cloud**
+Authenticates Jenkins with GCP using a service account and configures Docker access to **Artifact Registry**.
+
+```bash
+gcloud auth activate-service-account
+gcloud auth configure-docker
+```
+
+**4️⃣ SonarQube Scan**
+Runs static code analysis using SonarQube to detect bugs, vulnerabilities, and code quality issues.
+
+```bash
+sonar-scanner
+```
+
+**5️⃣ Build and Push Docker Image**
+Builds the application container image and pushes it to **Google Artifact Registry**.
+
+```bash
+docker build -t IMAGE:TAG .
+docker push IMAGE:TAG
+```
+
+The image is tagged using the **Git commit hash**.
+
+**6️⃣ Helm Deployment**
+Deploys or upgrades the application in Kubernetes using Helm.
+
+```bash
+helm upgrade --install
+```
+
+---
+
+## 📦 Jenkins Shared Library (Groovy)
+
+A **shared Groovy function** is used to simplify Helm deployments across pipelines.
+
+### `helmDeploy.groovy`
+
+This function executes the Helm deployment command.
+
+```groovy
+def call(config) {
+
+    sh """
+    helm upgrade --install ${config.releaseName} ${config.chartPath} \
+    --namespace ${config.namespace} \
+    --create-namespace \
+    -f ${config.valuesFile} \
+    --set image.tag=${config.tag} \
+    --wait \
+    --timeout 5m
+    """
+
+}
+```
+
+### What It Does
+
+* Deploys the Helm chart
+* Creates the namespace if it does not exist
+* Uses the provided `values.yaml`
+* Injects the **Docker image tag dynamically**
+* Waits until the deployment is completed
+
+---
+
+## 🔁 CI/CD Workflow
+
+```text
+GitHub Push
+      ↓
+Jenkins Pipeline Trigger
+      ↓
+Build Docker Image
+      ↓
+Push Image to Artifact Registry
+      ↓
+Helm Deploy to Kubernetes
+      ↓
+Application Running in GKE
+```
+
+This workflow enables **automated continuous integration and deployment** of the Notes App.
+
