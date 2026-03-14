@@ -86,7 +86,8 @@ stage('Helm Deploy') {
                 releaseName: "${RELEASE_NAME}",
                 chartPath: "${CHART_PATH}",
                 namespace: "${NAMESPACE}",
-                valuesFile: "${VALUES_FILE}"
+                valuesFile: "${VALUES_FILE}",
+                tag: "${TAG}"
             )
         }
     }
