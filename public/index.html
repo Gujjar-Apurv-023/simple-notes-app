@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 DevOps Pulse - Notes</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        :root {
+            --accent-primary: #818cf8;
+            --accent-secondary: #c084fc;
+            --accent-tertiary: #22d3ee;
+            --glass: rgba(10, 15, 30, 0.85);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --bg-dark: #020617;
+            --neon-gradient: linear-gradient(90deg, #818cf8, #c084fc, #22d3ee, #818cf8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-dark);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Aurora Background */
+        .mesh-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(192, 132, 252, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(2, 6, 23, 1) 0%, transparent 100%);
+            z-index: 0;
+            animation: bg-pulse 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes bg-pulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Floating DevOps Icons with Glow */
+        .background-icons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .background-icons span {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.25;
+            filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.6));
+            animation: float-drift linear infinite;
+        }
+
+        @keyframes float-drift {
+            0% { transform: translateY(110vh) rotate(0deg) translateX(0); }
+            50% { transform: translateY(50vh) rotate(180deg) translateX(20px); }
+            100% { transform: translateY(-20vh) rotate(360deg) translateX(-10px); }
+        }
+
+        .background-icons span:nth-child(1) { left: 8%; animation-duration: 18s; animation-delay: 0s; }
+        .background-icons span:nth-child(2) { left: 22%; animation-duration: 24s; animation-delay: -4s; }
+        .background-icons span:nth-child(3) { left: 45%; animation-duration: 20s; animation-delay: -8s; }
+        .background-icons span:nth-child(4) { left: 65%; animation-duration: 28s; animation-delay: -2s; }
+        .background-icons span:nth-child(5) { left: 82%; animation-duration: 22s; animation-delay: -6s; }
+
+        /* Centered Glass Container with Multi-Color Neon Border */
+        .container {
+            position: relative;
+            z-index: 10;
+            background: var(--glass);
+            width: 90%;
+            max-width: 440px;
+            padding: 45px 35px;
+            border-radius: 35px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+            backdrop-filter: blur(25px);
+            text-align: center;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: var(--neon-gradient);
+            background-size: 400% 400%;
+            z-index: -1;
+            border-radius: 35px;
+            animation: border-flow 8s linear infinite;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            padding: 2px;
+        }
+
+        @keyframes border-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            border-radius: 100px;
+            background: rgba(34, 211, 238, 0.1);
+            color: #22d3ee;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #22d3ee;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 0 10px #22d3ee;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        /* High Visibility Animated Title */
+        h2 {
+            font-weight: 800;
+            font-size: 2.4rem;
+            background: var(--neon-gradient);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 12px rgba(129, 140, 248, 0.4));
+            animation: title-shine 4s linear infinite;
+            letter-spacing: -0.03em;
+        }
+
+        @keyframes title-shine {
+            to { background-position: 300% center; }
+        }
+
+        .quote {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 35px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        /* Input Styling */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        #noteInput {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 14px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        #noteInput::placeholder { color: rgba(255,255,255,0.3); }
+        #noteInput:focus { outline: none; }
+
+        .add-btn {
+            padding: 0 26px;
+            border-radius: 14px;
+            border: none;
+            background: var(--neon-gradient);
+            background-size: 200% auto;
+            color: #020617;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: border-flow 4s linear infinite;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 211, 238, 0.4);
+        }
+
+        /* List Items Styling */
+        #notesList {
+            list-style: none;
+            text-align: left;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        #notesList li {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 16px 20px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #notesList li:hover {
+            background: rgba(255, 255, 255, 0.07);
+            transform: scale(1.02);
+            border-color: var(--accent-primary);
+        }
+
+        .empty-pipeline {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 30px 0;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            letter-spacing: 0.25em;
+            margin-top: 35px;
+            opacity: 0.4;
+        }
+
+        /* Developer Badge - Hyper Attractive */
+        .dev-badge {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            z-index: 100;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .dev-badge span {
+            font-size: 0.85rem;
+            font-weight: 800;
+            background: var(--neon-gradient);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: title-shine 3s linear infinite;
+        }
+
+        .dev-badge:hover {
+            transform: translateY(-8px) scale(1.08);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-tertiary);
+            box-shadow: 0 15px 35px rgba(34, 211, 238, 0.3);
+        }
+
+        .dev-badge::after {
+            content: '🔗';
+            font-size: 0.8rem;
+            filter: drop-shadow(0 0 5px var(--accent-tertiary));
+        }
+
+        /* Custom Scrollbar */
+        #notesList::-webkit-scrollbar { width: 4px; }
+        #notesList::-webkit-scrollbar-thumb { background: var(--accent-tertiary); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="mesh-bg"></div>
+
+    <div class="background-icons">
+        <span>🐳</span> <span>☸️</span> <span>🚀</span>
+        <span>⚙️</span> <span>🐙</span>
+    </div>
+
+    <div class="container">
+        <div class="status-badge">Pipeline: Active</div>
+        
+        <h2>🚀 DevOps Pulse</h2>
+        <div class="quote">“Small notes, atomic deployments.”</div>
+
+        <div class="input-group">
+            <input type="text" id="noteInput" placeholder="✍️ Commit a note..." autocomplete="off">
+            <button class="add-btn" id="addNoteBtn">Deploy</button>
+        </div>
+
+        <ul id="notesList">
+            <li class="empty-pipeline">Monitoring idle pipeline...</li>
+        </ul>
+
+        <div class="footer">STABLE RELEASE • v2.4.0</div>
+    </div>
+
+    <!-- Enhanced Developer Tag -->
+    <a href="https://apurv-gujjar.me" target="_blank" class="dev-badge">
+        <span>apurv-gujjar.me</span>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const noteInput = document.getElementById('noteInput');
+            const addBtn = document.getElementById('addNoteBtn');
+            const list = document.getElementById('notesList');
+
+            // --- STORAGE LOGIC ---
+            // Load notes from localStorage on startup
+            const loadStoredNotes = () => {
+                const stored = localStorage.getItem('devops_notes');
+                if (stored) {
+                    const notes = JSON.parse(stored);
+                    if (notes.length > 0) {
+                        list.innerHTML = '';
+                        notes.forEach(note => createNoteElement(note, false));
+                    }
+                }
+            };
+
+            const saveNotes = () => {
+                const notes = [];
+                list.querySelectorAll('li:not(.empty-pipeline)').forEach(li => {
+                    notes.push(li.querySelector('.note-text').innerText);
+                });
+                localStorage.setItem('devops_notes', JSON.stringify(notes));
+            };
+
+            const createNoteElement = (text, isNew = true) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="note-text" style="flex: 1; word-break: break-all; font-weight: 600;">${text}</span>
+                    <button class="rollback-btn" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; cursor:pointer; font-weight:900; padding: 6px 12px; border-radius: 10px; font-size: 0.65rem; margin-left: 15px; transition: 0.2s;">ROLLBACK</button>
+                `;
+                
+                // Rollback (Delete) functionality
+                li.querySelector('.rollback-btn').onclick = () => {
+                    li.remove();
+                    checkEmpty();
+                    saveNotes();
+                };
+
+                list.prepend(li);
+
+                if (isNew) {
+                    saveNotes();
+                    // Enhanced Neon Confetti
+                    confetti({
+                        particleCount: 100,
+                        spread: 80,
+                        origin: { y: 0.7 },
+                        colors: ['#818cf8', '#c084fc', '#22d3ee', '#ffffff']
+                    });
+                }
+            };
+
+            const addNote = () => {
+                const text = noteInput.value.trim();
+                if (!text) return;
+
+                const placeholder = list.querySelector('.empty-pipeline');
+                if (placeholder) placeholder.remove();
+
+                createNoteElement(text, true);
+                noteInput.value = '';
+            };
+
+            window.checkEmpty = () => {
+                if (list.querySelectorAll('li').length === 0) {
+                    list.innerHTML = '<li class="empty-pipeline">Monitoring idle pipeline...</li>';
+                }
+            };
+
+            // Init
+            loadStoredNotes();
+
+            addBtn.addEventListener('click', addNote);
+            noteInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addNote(); });
+        });
+    </script>
+</body>
+</html>
