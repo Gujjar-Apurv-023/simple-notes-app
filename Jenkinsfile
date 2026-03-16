@@ -4,6 +4,7 @@ pipeline {
 agent any
 
 environment {
+    
 TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
 SONAR_HOME = tool "sonar"
 IMAGE_NAME = "us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app"
@@ -11,6 +12,7 @@ RELEASE_NAME = "notes-app"
 NAMESPACE = "dev"
 CHART_PATH = "./helm/notes-app-chart"
 VALUES_FILE = "./helm/notes-app-chart/values.yaml"
+
 }
 
 stages {
