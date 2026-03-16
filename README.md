@@ -922,3 +922,23 @@ rate(node_network_transmit_bytes_total[5m])
 Displays network traffic transmitted by nodes.
 
 ```
+🧰 Tech Stack
+```
+Jenkins – CI/CD pipeline automation
+GitHub – Source code management
+Docker – Containerization
+Google Cloud Platform (GCP) – Cloud infrastructure
+Google Artifact Registry – Docker image storage
+Google Kubernetes Engine (GKE) – Container orchestration
+Helm – Kubernetes package manager for deployments
+SonarQube – Code quality and security analysis
+Jenkins Shared Library (Groovy) – Reusable pipeline functions
+```
+⚙️ Pipeline Workflow
+```
+Checkout code from GitHub
+Authenticate with GCP
+Run SonarQube code scan
+Build Docker image
+Push image to Artifact Registry
+Deploy to GKE using Helm
