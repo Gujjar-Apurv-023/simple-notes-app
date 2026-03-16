@@ -26,6 +26,16 @@ stage('Clean Workspace') {
         cleanWs()
     }
 }
+    
+// ==================================================
+// 🔄 CHECKOUT CODE
+// ==================================================
+
+stage('Checkout Code') {
+    steps {
+        checkout scm
+    }
+}
 
 // ==================================================
 // 🔐 AUTHENTICATE GCP & GKE 
