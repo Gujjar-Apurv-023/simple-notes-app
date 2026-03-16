@@ -682,4 +682,137 @@ Application Running in GKE
 
 This workflow enables **automated continuous integration and deployment** of the Notes App.
 
-![test]()
+# Prometheus & Grafana Setup on GKE using Helm
+
+This guide shows how to install **Prometheus** and **Grafana** on a **GKE Kubernetes cluster** using **Helm** and the **kube-prometheus-stack** chart.
+
+---
+
+## Architecture
+```
+GKE Cluster
+│
+▼
+kube-prometheus-stack
+│
+├── Prometheus (collects metrics)
+├── Grafana (visual dashboards)
+├── Alertmanager (alerts)
+├── kube-state-metrics (k8s object metrics)
+└── node-exporter (node metrics)
+```
+
+
+# Prerequisites
+
+Make sure these tools are installed:
+```
+- kubectl
+- Helm
+- Google Cloud CLI
+- Running GKE cluster
+```
+Verify cluster connection:
+```
+kubectl get nodes
+```
+
+# Step 1: Add Prometheus Helm Repository
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+helm repo update
+
+```
+
+# Step 2: Install Prometheus & Grafana
+```
+
+helm install monitoring prometheus-community/kube-prometheus-stack
+--namespace monitoring
+--create-namespace
+--set grafana.service.type=LoadBalancer
+--set prometheus.service.type=LoadBalancer
+```
+
+This installs:
+```
+- Prometheus
+- Grafana
+- Alertmanager
+- kube-state-metrics
+- node-exporter
+```
+
+
+# Step 3: Verify Installation
+
+Check pods:
+```
+kubectl get pods -n monitoring
+```
+Check services:
+
+```
+kubectl get svc -n monitoring
+```
+
+Example output:
+
+```
+NAME TYPE EXTERNAL-IP
+monitoring-grafana LoadBalancer <grafana-ip>
+monitoring-kube-prometheus-prometheus LoadBalancer <prometheus-ip>
+
+```
+
+# Step 4: Access Grafana
+
+Open browser:
+```
+http://<grafana-external-ip>
+
+```
+Get Grafana admin password:
+```
+
+kubectl -n monitoring get secret monitoring-grafana
+-o jsonpath="{.data.admin-password}" | base64 -d
+```
+
+Login credentials:
+
+```
+username: admin
+password: <decoded-password>
+```
+
+# Step 5: Access Prometheus
+
+Open Prometheus UI:
+```
+
+http://<prometheus-external-ip>:9090
+
+```
+Run sample query:
+
+
+
+# Useful Commands
+```
+Check monitoring pods
+kubectl get pods -n monitoring
+kubectl get svc -n monitoring
+kubectl logs -n monitoring <pod-name>
+helm upgrade monitoring prometheus-community/kube-prometheus-stack -n monitoring
+helm uninstall monitoring -n monitoring
+
+
+
+# Result
+```
+Prometheus and Grafana are successfully deployed on the Kubernetes cluster.
+
+Prometheus collects metrics from Kubernetes nodes and workloads, while Grafana provides dashboards for visualization and monitoring.
