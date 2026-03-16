@@ -18,7 +18,7 @@ VALUES_FILE = "./helm/notes-app-chart/values.yaml"
 stages {
 
 // ==================================================
-// 🧹 CLEAN WORKSPACE
+// 🧹 CLEAN WORKSPACE 
 // ==================================================
 
 stage('Clean Workspace') {
