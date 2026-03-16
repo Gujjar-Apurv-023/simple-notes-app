@@ -4,15 +4,13 @@ pipeline {
 agent any
 
 environment {
-    
-TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
-SONAR_HOME = tool "sonar"
-IMAGE_NAME = "us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app"
-RELEASE_NAME = "notes-app"
-NAMESPACE = "dev"
-CHART_PATH = "./helm/notes-app-chart"
-VALUES_FILE = "./helm/notes-app-chart/values.yaml"
-
+    TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
+    SONAR_HOME = tool "sonar"
+    IMAGE_NAME = "us-central1-docker.pkg.dev/project-3fb9dc72-feba-49ea-b89/devops-repo/simple-notes-app"
+    RELEASE_NAME = "notes-app"
+    NAMESPACE = "dev"
+    CHART_PATH = "./helm/notes-app-chart"
+    VALUES_FILE = "./helm/notes-app-chart/values.yaml"
 }
 
 stages {
@@ -26,7 +24,7 @@ stage('Clean Workspace') {
         cleanWs()
     }
 }
-    
+
 // ==================================================
 // 🔄 CHECKOUT CODE
 // ==================================================
@@ -38,7 +36,7 @@ stage('Checkout Code') {
 }
 
 // ==================================================
-// 🔐 AUTHENTICATE GCP & GKE 
+// 🔐 AUTHENTICATE GCP & CONNECT GKE
 // ==================================================
 
 stage('Authenticate GCP & Connect GKE') {
@@ -65,10 +63,22 @@ stage('SonarQube Scan') {
 }
 
 // ==================================================
-// 🐳 BUILD IMAGE
+// ✅ QUALITY GATE CHECK
 // ==================================================
 
-stage('Build  & Push Image') {
+stage('Quality Gate') {
+    steps {
+        timeout(time: 5, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
+
+// ==================================================
+// 🐳 BUILD & PUSH IMAGE
+// ==================================================
+
+stage('Build & Push Image') {
     steps {
         sh """
         docker build -t ${IMAGE_NAME}:${TAG} .
@@ -78,7 +88,7 @@ stage('Build  & Push Image') {
 }
 
 // ==================================================
-// 🚀 HELM DEPLOY USING SHARED LIBRARY 
+// 🚀 HELM DEPLOY USING SHARED LIBRARY
 // ==================================================
 
 stage('Helm Deploy') {
@@ -95,5 +105,14 @@ stage('Helm Deploy') {
     }
 }
 
+}
+
+post {
+    success {
+        echo "Deployment Successful 🚀"
+    }
+    failure {
+        echo "Pipeline Failed ❌"
+    }
 }
 }
