@@ -817,3 +817,108 @@ Prometheus and Grafana are successfully deployed on the Kubernetes cluster.
 
 Prometheus collects metrics from Kubernetes nodes and workloads, while Grafana provides dashboards for visualization and monitoring.
 ```
+# Prometheus Query Examples (PromQL)
+
+Below are some useful Prometheus queries to monitor Kubernetes cluster metrics.
+
+
+## 1. Check if targets are up
+````
+up
+
+Shows whether monitored targets are running.
+
+- `1` = target is up
+- `0` = target is down
+
+
+````
+## 2. Node CPU Usage
+
+```
+rate(node_cpu_seconds_total[5m])
+
+Displays CPU usage rate of nodes over the last 5 minutes.
+
+```
+
+## 3. Node Memory Available
+```
+
+node_memory_MemAvailable_bytes
+Shows available memory on cluster nodes.
+```
+
+## 4. Node Memory Usage
+```
+
+(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+
+Displays memory currently used on nodes.
+
+```
+
+## 5. Pod Status
+
+```
+kube_pod_status_phase
+Shows the status of pods:
+
+- Running
+- Pending
+- Failed
+- Succeeded
+
+```
+
+## 6. Container CPU Usage
+
+```
+rate(container_cpu_usage_seconds_total[5m])
+Displays CPU usage for running containers.
+```
+
+## 7. Container Memory Usage
+
+```
+container_memory_usage_bytes
+Shows memory usage of containers.
+```
+
+## 8. Running Pods Count
+
+```
+count(kube_pod_info)
+Shows the total number of pods running in the cluster
+
+```
+## 9. Node Information
+
+```
+kube_node_info
+Displays information about cluster nodes.
+```
+
+
+## 10. Kubernetes Pod Restarts
+
+```
+kube_pod_container_status_restarts_total
+Shows number of container restarts in pods.
+```
+
+## 11. Network Receive Traffic
+
+```
+rate(node_network_receive_bytes_total[5m])
+Displays network traffic received by nodes.
+
+```
+
+## 12. Network Transmit Traffic
+
+```
+rate(node_network_transmit_bytes_total[5m])
+Displays network traffic transmitted by nodes.
+
+```
