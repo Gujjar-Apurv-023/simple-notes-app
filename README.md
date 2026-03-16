@@ -809,10 +809,11 @@ kubectl logs -n monitoring <pod-name>
 helm upgrade monitoring prometheus-community/kube-prometheus-stack -n monitoring
 helm uninstall monitoring -n monitoring
 
-
+```
 
 # Result
 ```
 Prometheus and Grafana are successfully deployed on the Kubernetes cluster.
 
 Prometheus collects metrics from Kubernetes nodes and workloads, while Grafana provides dashboards for visualization and monitoring.
+```
