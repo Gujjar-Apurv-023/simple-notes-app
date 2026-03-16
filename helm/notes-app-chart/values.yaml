@@ -116,8 +116,8 @@ resources:
     memory: 128Mi    # Minimum memory guaranteed
 
   limits:
-    cpu: 300m        # Maximum CPU the container can use
-    memory: 500Mi    # Maximum memory the container can use
+    cpu: 500m        # Maximum CPU the container can use
+    memory: 600Mi    # Maximum memory the container can use
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:  
   httpGet:                 # Kubernetes will perform an HTTP request to check container health
@@ -141,7 +141,7 @@ autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 5
-  targetCPUUtilizationPercentage: 70
+  targetCPUUtilizationPercentage: 80
 
 
 nodeSelector: {}
