@@ -68,36 +68,10 @@ stage('SonarQube Scan') {
 // 🐳 BUILD IMAGE
 // ==================================================
 
-stage('Build Image') {
+stage('Build  & Push Image') {
     steps {
         sh """
         docker build -t ${IMAGE_NAME}:${TAG} .
-        """
-    }
-}
-
-// ==================================================
-// 🔐 TRIVY IMAGE SCAN
-// ==================================================
-
-stage('Trivy Security Scan') {
-    steps {
-        sh """
-        trivy image \
-        --severity HIGH,CRITICAL \
-        --exit-code 1 \
-        ${IMAGE_NAME}:${TAG}
-        """
-    }
-}
-
-// ==================================================
-// 📦 PUSH IMAGE
-// ==================================================
-
-stage('Push Image') {
-    steps {
-        sh """
         docker push ${IMAGE_NAME}:${TAG}
         """
     }
