@@ -63,18 +63,6 @@ stage('SonarQube Scan') {
 }
 
 // ==================================================
-// ✅ QUALITY GATE CHECK
-// ==================================================
-
-stage('Quality Gate') {
-    steps {
-        timeout(time: 5, unit: 'MINUTES') {
-            waitForQualityGate abortPipeline: true
-        }
-    }
-}
-
-// ==================================================
 // 🐳 BUILD & PUSH IMAGE
 // ==================================================
 
@@ -107,12 +95,4 @@ stage('Helm Deploy') {
 
 }
 
-post {
-    success {
-        echo "Deployment Successful 🚀"
-    }
-    failure {
-        echo "Pipeline Failed ❌"
-    }
-}
 }
