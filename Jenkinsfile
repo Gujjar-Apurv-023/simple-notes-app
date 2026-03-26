@@ -2,7 +2,7 @@
 
 pipeline {
 agent any
-
+    
 environment {
     TAG = "${sh(script: 'git rev-parse --short=10 HEAD', returnStdout: true).trim()}"
     SONAR_HOME = tool "sonar"
@@ -15,83 +15,91 @@ environment {
 
 stages {
 
-// ==================================================
-// 🧹 CLEAN WORKSPACE 
-// ==================================================
+    // ==================================================
+    // 🧹 CLEAN WORKSPACE 
+    // ==================================================
 
-stage('Clean Workspace') {
-    steps {
-        cleanWs()
-    }
-}
-
-// ==================================================
-// 🔄 CHECKOUT CODE
-// ==================================================
-
-stage('Checkout Code') {
-    steps {
-        checkout scm
-    }
-}
-
-// ==================================================
-// 🔐 AUTHENTICATE GCP & CONNECT GKE 
-// ==================================================
-
-stage('Authenticate GCP & Connect GKE') {
-    steps {
-        withCredentials([file(credentialsId: 'gcp-artifact-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-            sh '''
-            gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-            '''
+    stage('Clean Workspace') {
+        steps {
+            cleanWs()
         }
     }
-}
 
-// ==================================================
-// 🔎 SONARQUBE SCAN
-// ==================================================
+    // ==================================================
+    // 🔄 CHECKOUT CODE
+    // ==================================================
 
-stage('SonarQube Scan') {
-    steps {
-        withSonarQubeEnv('sonar') {
-            sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectKey=simple-notes-app"
+    stage('Checkout Code') {
+        steps {
+            checkout scm
         }
     }
-}
 
-// ==================================================
-// 🐳 BUILD & PUSH IMAGE
-// ==================================================
+    // ==================================================
+    // 🔐 AUTHENTICATE GCP & CONNECT GKE 
+    // ==================================================
 
-stage('Build & Push Image') {
-    steps {
-        sh """
-        docker build -t ${IMAGE_NAME}:${TAG} .
-        docker push ${IMAGE_NAME}:${TAG}
-        """
-    }
-}
+    stage('Authenticate GCP & Connect GKE') {
+        steps {
+            withCredentials([file(credentialsId: 'gcp-artifact-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                sh '''
+                gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-// ==================================================
-// 🚀 HELM DEPLOY USING SHARED LIBRARY
-// ==================================================
+                # 🔥 CONNECT TO GKE (FIX ADDED HERE)
+                gcloud container clusters get-credentials sclable-app-deployment \
+                  --region asia-east1 \
+                  --project project-3fb9dc72-feba-49ea-b89
 
-stage('Helm Deploy') {
-    steps {
-        script {
-            helmDeploy(
-                releaseName: "${RELEASE_NAME}",
-                chartPath: "${CHART_PATH}",
-                namespace: "${NAMESPACE}",
-                valuesFile: "${VALUES_FILE}",
-                tag: "${TAG}"
-            )
+                # ✅ Debug (optional but recommended)
+                kubectl get nodes
+                '''
+            }
         }
     }
-}
+
+    // ==================================================
+    // 🔎 SONARQUBE SCAN
+    // ==================================================
+
+    stage('SonarQube Scan') {
+        steps {
+            withSonarQubeEnv('sonar') {
+                sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectKey=simple-notes-app"
+            }
+        }
+    }
+
+    // ==================================================
+    // 🐳 BUILD & PUSH IMAGE
+    // ==================================================
+
+    stage('Build & Push Image') {
+        steps {
+            sh """
+            docker build -t ${IMAGE_NAME}:${TAG} .
+            docker push ${IMAGE_NAME}:${TAG}
+            """
+        }
+    }
+
+    // ==================================================
+    // 🚀 HELM DEPLOY USING SHARED LIBRARY
+    // ==================================================
+
+    stage('Helm Deploy') {
+        steps {
+            script {
+                helmDeploy(
+                    releaseName: "${RELEASE_NAME}",
+                    chartPath: "${CHART_PATH}",
+                    namespace: "${NAMESPACE}",
+                    valuesFile: "${VALUES_FILE}",
+                    tag: "${TAG}"
+                )
+            }
+        }
+    }
 
 }
 
