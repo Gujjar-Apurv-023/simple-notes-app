@@ -36,7 +36,7 @@ stage('Checkout Code') {
 }
 
 // ==================================================
-// 🔐 AUTHENTICATE GCP & CONNECT GKE
+// 🔐 AUTHENTICATE GCP & CONNECT GKE 
 // ==================================================
 
 stage('Authenticate GCP & Connect GKE') {
