@@ -46,14 +46,6 @@ stages {
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                 gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-                # 🔥 CONNECT TO GKE (FIX ADDED HERE)
-                gcloud container clusters get-credentials sclable-app-deployment \
-                  --region asia-east1 \
-                  --project project-3fb9dc72-feba-49ea-b89
-
-                # ✅ Debug (optional but recommended)
-                kubectl get nodes
-                '''
             }
         }
     }
