@@ -45,7 +45,7 @@ stages {
                 sh '''
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                 gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-                kubectl config use-context gke_project-3fb9dc72-feba-49ea-b89_asia-east2_advance-deployment-project
+                gcloud container clusters get-credentials advance-deployment-project --region asia-east2 --project project-3fb9dc72-feba-49ea-b89
                 '''
             }
         }
